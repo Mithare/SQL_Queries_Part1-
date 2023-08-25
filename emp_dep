@@ -1,0 +1,84 @@
+select * from employee
+select * from department
+
+--Write a query to retrieve the employeename of employees along with their corresponding department names.
+
+select a.employeename, b.departmentname
+from employee as a
+join department as b on a.departmentid = b.departmentid
+
+
+--Write a query to calculate and retrieve the total salary expense for each department.
+
+select sum(a.salary) as tot_sal, b.departmentname
+from employee as a
+join department as b on a.departmentid = b.departmentid
+group by 2
+
+
+--Write a query to find the department that has the highest total salary expense.
+
+select sum(a.salary) as tot_sal, b.departmentname
+from employee as a
+join department as b on a.departmentid = b.departmentid
+group by 2
+order by 1 desc
+limit 1
+
+
+--Write a query to retrieve the employeename, and salary of employees whose salary is higher than the average salary of their respective departments.
+
+with cte as (select avg(salary) as sal, departmentid
+from employee
+group by 2
+order by 1)
+
+select a.employeename, a.salary, b.departmentname
+from employee as a
+join department as b 
+on a.departmentid = b.departmentid
+join cte as c on a.departmentid = c.departmentid
+where a.salary > c.sal
+
+
+--Retrieve Department Names with More Than 1 Employee
+
+
+select b.departmentname
+from employee as a
+join department as b on a.departmentid = b.departmentid
+group by 1
+having count(a.departmentid) > 1
+
+
+--Retrieve Employees with Top 2 Salaries in Each Department:
+
+
+SELECT E1.employeename, E1.Salary, E1.DepartmentID
+FROM Employee E1
+WHERE (
+    SELECT COUNT(*)
+    FROM Employee E2
+    WHERE E1.DepartmentID = E2.DepartmentID AND E1.Salary <= E2.Salary
+) <= 2;
+
+
+--Retrieve Employee Names with the Same employeename
+
+
+select a.employeename
+from employee as a
+join employee as b on a.employeename = b.employeename and a.employeeid != b.employeeid
+group by 1
+HAVING COUNT(*) >= 2
+
+
+--Calculate Salary Increase Percentage
+
+
+select a.employeeid, a.employeename, a.salary, ((a.salary - b.avg_sal) / b.avg_sal) * 100 as salary_increase
+from employee as a
+join (select avg(salary) as avg_sal, departmentid
+	 from employee
+	 group by 2) as b
+	 on a.departmentid = b.departmentid
